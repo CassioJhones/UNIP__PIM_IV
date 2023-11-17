@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1700172473 source:c:\users\cassi\desktop\testeunip\main.c
+	<stdio.h>
+	<conio.h>
+	<stdlib.h>
+	<locale.h>
+
