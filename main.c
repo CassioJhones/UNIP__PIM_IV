@@ -153,7 +153,7 @@ void NovaSenha()
 
     printf("\n[--- Senha Criada ---]\n");
     printf("\n[0] Menu Inicial");
-    printf("\n[1] Rep\n");
+    printf("\n[1] Repetir\n");
     while (1)
     {
         ch = _getch();
@@ -161,6 +161,9 @@ void NovaSenha()
         {
             MenuInicial();
             break;
+        }
+        else if(ch == '1'){
+         NovaSenha(); break;
         }
     }
 }
