@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1700933502 source:c:\users\cassi\downloads\pim4\sistemagesa\main.c
+	<stdio.h>
+	<conio.h>
+	<stdlib.h>
+	<locale.h>
+	<string.h>
+
+1700957836 source:c:\users\cassi\downloads\pim4\sistemagesa - em andamento\main.c
+	<stdlib.h>
+	<stdio.h>
+	<conio.h>
+	<stdlib.h>
+	<locale.h>
+	<string.h>
+	<time.h>
+
