@@ -1,239 +1,398 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <locale.h>
-void MenuInicial();
-void TelaCadastroFuncionario();
-void TelaDoUsuario();
-void TelaLogin();
-void NovaSenha();
-void TelaCadastroEmpresa();
-void Consulta();
-void CadastroEmpresa();
+#include <string.h>
+#include <time.h>
 
-char admin[20];
-char SenhaAdmin[20];
-char UserName[20];
-char UserSenha[20];
-int opcao;
+// códigos ANSI para cores
+#define ANSI_RESET   "\x1b[0m"
+#define ANSI_RED     "\x1b[31m"
+#define ANSI_GREEN   "\x1b[32m"
+#define ANSI_YELLOW  "\x1b[33m"
+#define ANSI_BLUE    "\x1b[34m"
 
-int main (void)
-{
-    setlocale(LC_ALL,"Portuguese"); // para os acentos da lingua portuguesa aparecer corretamente
-    MenuInicial();
+struct Usuario {
+    char nome_completo[100];
+    char login[20];
+    char senha[20];
+    int empresaSelecionada;
+};
+
+struct Empresa {
+    char razao_social[100];
+    char nome_fantasia[100];
+    char cnpj[15];
+    char data_abertura[11];
+    char telefone[15];
+    char responsavel[100];
+    char email[100];
+    char endereco[100];
+    char bairro[50];
+    char cidade[50];
+    char estado[3];
+    char cep[10];
+    char indicadores[500];
+};
+
+enum Telas {
+    TELA_MENU_PRINCIPAL,
+    TELA_CADASTRO_EMPRESA,
+    TELA_GERENCIAR_EMPRESAS,
+    TELA_RELATORIO,
+    TELA_CONSULTA_EMPRESA,
+    TELA_SAIR,
+    TELA_NOVA_OPCAO
+};
+
+void visualizarIndicadores(const struct Empresa *empresa);
+void visualizarIndicadores(const struct Empresa *empresa);
+void excluirCadastro(struct Empresa **empresas, int *numEmpresas);
+void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empresaSelecionada, int *telaAtual);
+void exibirMenuPrincipal(const struct Usuario *usuarioLogado);
+void cadastrarEmpresa(struct Empresa **empresas, int *numEmpresas, int *telaAtual);
+void gerenciarEmpresas(struct Empresa *empresas, int numEmpresas, int *telaAtual);
+void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaAtual);
+void limparTela();
+struct Usuario fazerLogin(const struct Usuario *usuarios, int numUsuarios);
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+
+    struct Usuario usuarios[4] = {
+        {"John Doe", "john", "senha123"},
+        {"Jane Doe", "jane", "outrasenha"},
+        {"Joao", "joao", "1234"},
+        {"ADMINISTRADOR", "0", "0"}  // APENAS PARA TESTE - APAGAR DEPOIS
+    };
+
+    struct Empresa *empresas = NULL;
+    int numEmpresas = 0;
+    int telaAtual = TELA_MENU_PRINCIPAL;
+
+    struct Usuario usuarioLogado = fazerLogin(usuarios, 4);
+    if (strcmp(usuarioLogado.login, "") == 0) {
+        printf(ANSI_RED "\nUsuário não encontrado. Encerrando o programa\n"ANSI_RESET);system("pause");
+        return 0;    }
+
+    printf("\nLogin bem-sucedido! Bem-vindo, %s.\n", usuarioLogado.nome_completo);system("pause");
+
+    while (telaAtual != TELA_SAIR) {
+        limparTela();
+
+        switch (telaAtual) {
+            case TELA_MENU_PRINCIPAL:
+                exibirMenuPrincipal(&usuarioLogado);break;
+            case TELA_CADASTRO_EMPRESA:
+                cadastrarEmpresa(&empresas, &numEmpresas, &telaAtual);break;
+            case TELA_GERENCIAR_EMPRESAS:
+                gerenciarEmpresas(empresas, numEmpresas, &telaAtual);break;
+            case TELA_RELATORIO:
+                exibirRelatorio(empresas, numEmpresas, &telaAtual);break;
+            case TELA_CONSULTA_EMPRESA:
+                {
+                    char cnpjConsulta[15];
+                    printf("Digite o CNPJ para consulta: ");
+                    scanf(" %[^\n]", cnpjConsulta);
+
+                    int empresaEncontrada = 0;
+                     int indiceEmpresa = -1;
+                    for (int i = 0; i < numEmpresas; i++) {
+                        if (strcmp(empresas[i].cnpj, cnpjConsulta) == 0) {
+                            printf(ANSI_GREEN"\nConsulta bem-sucedida!\nAbrindo Gerenciamento para %s\n" ANSI_RESET, empresas[i].nome_fantasia);
+                            empresaEncontrada = 1;
+                            indiceEmpresa = i;break;}
+                    }
+
+                    if (!empresaEncontrada) {
+                        printf(ANSI_RED"\nNenhuma empresa encontrada para o CNPJ informado.\n"ANSI_RESET);
+                    }else {
+                       usuarioLogado.empresaSelecionada = indiceEmpresa;
+                       opGerenciamento(empresas, numEmpresas, indiceEmpresa, &telaAtual);}
+
+                    printf("\nPressione Enter para continuar...");
+                    while (getchar() != '\n');
+                    telaAtual = TELA_MENU_PRINCIPAL;                }                break;
+            case TELA_NOVA_OPCAO:
+                printf("Nova opção escolhida!\n");
+                // Lógica da nova opção aqui
+                // Altera a tela para o menu principal após a nova opção
+                telaAtual = TELA_MENU_PRINCIPAL;break;}
+
+        if (telaAtual == TELA_MENU_PRINCIPAL) {
+            int opcao;
+            printf("Opção escolhida: ");
+            scanf("%d", &opcao);
+
+            while (getchar() != '\n');
+            switch (opcao) {
+                case 1:
+                    telaAtual = TELA_CADASTRO_EMPRESA;break;
+                case 2:
+                    telaAtual = TELA_GERENCIAR_EMPRESAS;break;
+                case 3:
+                    telaAtual = TELA_RELATORIO;break;
+                case 4:
+                    telaAtual = TELA_CONSULTA_EMPRESA;break;
+                case 5:
+                    telaAtual = TELA_SAIR;break;
+                default:
+                    printf(ANSI_RED"Opção inválida. Tente novamente.\n"ANSI_RESET);break;
+            }        }    }
+
+    free(empresas);
+    printf("\n----Até Logo----\n");
     return 0;
 }
+struct Usuario fazerLogin(const struct Usuario *usuarios, int numUsuarios) {
+    struct Usuario usuarioLogado;
+    char loginInformado[20];
+    char senhaInformada[20];
+    do {
+         limparTela();
+        printf("\n\t------------------------------");
+        printf(ANSI_GREEN "\n\t\tREALIZAR LOGIN" ANSI_RESET);
+        printf("\n\t------------------------------\n");
 
-void MenuInicial()
-{
-    system("cls");
+        printf("Login: ");
+        scanf(" %[^\n]", loginInformado);
 
-    printf("\t-------------------------------------");
-    printf("\n\t\t   SISTEMA GESA");
-    printf("\n\tGerenciador de Soluções Ambientais");
-    printf("\n\t\t   Seja Bem-Vindo");
+        while (getchar() != '\n');
+        printf("Senha: ");
+        scanf(" %[^\n]", senhaInformada);
+
+        int usuarioValido = 0;
+        for (int i = 0; i < numUsuarios; i++) {
+            if (strcmp(usuarios[i].login, loginInformado) == 0 &&
+                strcmp(usuarios[i].senha, senhaInformada) == 0) {
+                usuarioLogado = usuarios[i];
+                usuarioValido = 1;break;}
+        }
+
+        if (!usuarioValido) {
+            printf(ANSI_RED"\n[--Usuário ou senha inválidos. Tente novamente--]\n"ANSI_RESET);system("pause");
+            strcpy(usuarioLogado.login, "");        }
+    } while (strcmp(usuarioLogado.login, "") == 0);
+
+    return usuarioLogado;
+}
+
+void exibirMenuPrincipal(const struct Usuario *usuarioLogado){
+    printf("\n\t-------------SISTEMA GESA------------\n");
+    printf("\tGerenciador de Soluções Ambientais\n");
+    printf("\tSeja Bem-vindo!" ANSI_GREEN " - %s" ANSI_RESET, usuarioLogado->nome_completo);
     printf("\n\t-------------------------------------\n");
 
-    printf("\nEscolha uma opção:\n");
-    printf("\n[1] Realizar Login");
-    printf("\n[2] Não tenho cadastro");
-    printf("\n[3] Esqueci minha senha");
-    printf("\n[4] Fechar Programa\n");
-
-    printf("Opcao:  ");
-    scanf("%d",&opcao);
-    switch (opcao)
-    {
-    case 1:
-        TelaLogin();
-        break;
-    case 2:
-        TelaCadastroFuncionario();
-        break;
-    case 3:
-        NovaSenha();
-        break;
-    case 4:
-        printf("----Até Logo----");
-        break;
-    default:
-        printf("\n[--Opção Inválida--]\n");
-        system("pause");
-        MenuInicial();
-        break;
-    }
+    printf("\nEscolha uma Opção:\n");
+    printf("[1] Cadastrar nova empresa.\n");
+    printf("[2] Gerenciar empresas.\n");
+    printf("[3] Relatório.\n");
+    printf("[4] Consultar empresa por CNPJ.\n");
+    printf("[5] Sair.\n");
 }
 
-void TelaCadastroFuncionario()
-{
-    char ch;
-    char UserMail[20];
+void cadastrarEmpresa(struct Empresa **empresas, int *numEmpresas, int *telaAtual) {
+    struct Empresa novaEmpresa;
 
-    system("cls");
-    printf("\t-------------------------------------");
-    printf("\n\t\tCADASTRO DE FUNCIONARIO");
-    printf("\n\t-------------------------------------\n");
-
-    printf("\nPor favor, preencha os seguintes dados:");
-    printf("\nNome Completo:");
-    scanf(" %20[^\n]", UserName);
-    printf("\nCPF:");
-
-    printf("\nE-Mail:");
-    scanf("%s",UserMail);
-
-    printf("\n \n Cadastro Realizado com Sucesso!");
-    printf("\nSeu usuario: %s ",UserName);
-    printf("\nSua Senha: %s \n",UserSenha);
-    printf("\nRetorne a tela inicial usando 'espaço'");
-
-    while (1)
-    {
-        ch = _getch();
-
-        if (ch == ' ')
-        {
-            MenuInicial();
-            break;
-        }
-    }
-
-}
-
-void TelaLogin()
-{
-    char ch;
-    system("cls");
-    printf("\t---------------------------");
-    printf("\n\t\tFAZER LOGIN");
-    printf("\n\t---------------------------\n");
-
-    printf("\nUsuario: ");
-    scanf("%s",admin);
-    printf("Senha: ");
-    scanf("%s",SenhaAdmin);
-
-    if (strcmp(admin, "0") == 0 && strcmp(SenhaAdmin, "0") == 0)
-    {
-        printf("\n[---- Acesso permitido!----]\n");
-        system("pause");
-        TelaDoUsuario();
-    }
-    else
-    {
-        printf("\n[--- Acesso Negado ---]\n");
-        printf("\n[0] Menu Inicial");
-        printf("\n[1] Tentar Novamente\n");
-        while (1)
-        {
-            ch = _getch();
-            if (ch == '0')
-            {
-                MenuInicial();
-                break;
-            }
-            else if(ch == '1')
-            {
-                TelaLogin();
-            }
-        }
-    }
-}
-
-void NovaSenha()
-{
-    char ch;
-    system("cls");
-    printf("\t---------------------------");
-    printf("\n\t\tNOVA SENHA");
-    printf("\n\t---------------------------\n");
-
-    printf("\nDigite a nova senha:");
-    scanf("%s", UserSenha);
-
-    printf("\n[--- Senha Criada ---]\n");
-    printf("\n[0] Menu Inicial");
-    printf("\n[1] Repetir\n");
-    while (1)
-    {
-        ch = _getch();
-        if (ch == '0')
-        {
-            MenuInicial();
-            break;
-        }
-        else if(ch == '1'){
-         NovaSenha(); break;
-        }
-    }
-}
-
-void Consulta() {
-
-}
-
-void CadastroEmpresa()
-{
-
-    system("cls");
-    printf("\t-------------------------------------");
+    printf("\n\t-------------------------------------");
     printf("\n\t\tCADASTRO DE EMPRESA");
     printf("\n\t-------------------------------------\n");
 
-    printf("\nPor favor, preencha os seguintes dados:\n");
-    printf("\nRazão Social:");
-    printf("\nNome Fantasia:");
-    scanf("%s",UserSenha);
-    printf("\nCNPJ:");
-    printf("\nData de Abertura:");
-    printf("\nResponsavel:");
-    printf("\nTelefone:");
-    printf("\nE-mail:");
-    printf("\nEndereço:");
-    printf("\nBairro:");
-    printf("\nCidade:");
-    printf("\nEstado:");
-    printf("\nCEP:");
-    printf("\nIndustria(Nicho):");
+    printf("Razão Social: ");
+    scanf(" %[^\n]", novaEmpresa.razao_social);
 
-    printf("\nEmpresa Cadastrada com sucesso!\n \n");
-    system("PAUSE");
-    TelaDoUsuario();
+    printf("Nome Fantasia: ");
+    scanf(" %[^\n]", novaEmpresa.nome_fantasia);
+
+    printf("CNPJ: ");
+    scanf(" %[^\n]", novaEmpresa.cnpj);
+
+    printf("Data de Abertura: ");
+    scanf(" %[^\n]", novaEmpresa.data_abertura);
+
+    printf("Telefone: ");
+    scanf(" %[^\n]", novaEmpresa.telefone);
+
+    printf("Responsável: ");
+    scanf(" %[^\n]", novaEmpresa.responsavel);
+
+    printf("E-mail: ");
+    scanf(" %[^\n]", novaEmpresa.email);
+
+    printf("Endereço: ");
+    scanf(" %[^\n]", novaEmpresa.endereco);
+
+    printf("Bairro: ");
+    scanf(" %[^\n]", novaEmpresa.bairro);
+
+    printf("Cidade: ");
+    scanf(" %[^\n]", novaEmpresa.cidade);
+
+    printf("Estado: ");
+    scanf(" %[^\n]", novaEmpresa.estado);
+
+    printf("CEP: ");
+    scanf(" %[^\n]", novaEmpresa.cep);
+
+    struct Empresa *temp = realloc(*empresas, (*numEmpresas + 1) * sizeof(struct Empresa));
+
+    if (temp == NULL) {
+        printf(ANSI_RED"Erro ao alocar memória.\n"ANSI_RESET);
+        system("pause");
+        return;
+    }
+
+    *empresas = temp;
+
+    (*empresas)[*numEmpresas] = novaEmpresa;
+    (*numEmpresas)++;
+
+    printf(ANSI_GREEN"\nEmpresa cadastrada com sucesso!\n"ANSI_RESET);
+    system("pause");    limparTela();
+    *telaAtual = TELA_MENU_PRINCIPAL;
+
 }
 
-void TelaDoUsuario()
-{
-    system("cls");
-    printf("\t---------------------------");
-    printf("\n\t\tMENU INICIAL");
-    printf("\n\t---------------------------\n");
-
-    printf("\nEscolha uma opção:\n");
-    printf("\n[1] Cadastrar Nova Empresa");
-    printf("\n[2] Gerenciar Empresas");
-    printf("\n[3] Relatorios Globais");
-    printf("\n[4] Sair\n");
-
-    printf("Opcao:  ");
-    scanf("%d",&opcao);
-    switch (opcao)
-    {
-    case 1:
-        CadastroEmpresa();
-        break;
-    case 2:
-        printf("Opcao:  ");
-        break;
-    case 3:
-        printf("Opcao:  ");
-        break;
-    case 4:
-        MenuInicial();
-        break;
-    default:
-        printf("\n[--Opção Inválida--]\n");
-        system("pause");
-        TelaDoUsuario();
-        break;
+void gerenciarEmpresas(struct Empresa *empresas, int numEmpresas, int *telaAtual) {
+    if (numEmpresas == 0) {
+        printf(ANSI_RED"\n[--Nenhuma empresa cadastrada--]\n"ANSI_RESET);
+        system("pause"); *telaAtual = TELA_MENU_PRINCIPAL;
     }
+
+    printf("\n\t-----------------------------------");
+    printf("\n\t\tGERENCIAR EMPRESAS");
+    printf("\n\t-----------------------------------\n");
+
+    printf("Escolha uma opção:\n");
+    printf("[1] Consultar empresa\n");
+    printf("[2] Voltar ao menu principal.\n");
+
+    int opcao;
+    printf("Opção escolhida: ");
+    scanf("%d", &opcao);
+
+    while (getchar() != '\n');
+
+    switch (opcao) {
+        case 1:
+            *telaAtual = TELA_CONSULTA_EMPRESA;break;
+        case 2:
+            *telaAtual = TELA_MENU_PRINCIPAL;break;
+        default:
+            printf(ANSI_RED"Opção inválida. Tente novamente.\n"ANSI_RESET); system("pause");break;
+    }
+}
+
+void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaAtual) {
+    if (numEmpresas == 0) {
+        printf(ANSI_RED"\n[--Nenhuma empresa cadastrada--]\n"ANSI_RESET);
+        *telaAtual = TELA_MENU_PRINCIPAL;
+        return;
+    }
+
+    printf("\n\t-----------------------------");
+    printf("\n\t\tRELATÓRIO");
+    printf("\n\t-----------------------------\n");
+
+    for (int i = 0; i < numEmpresas; i++) {
+        printf("Empresa %d:\n", i + 1);
+        printf("Nome Fantasia: %s\n", empresas[i].nome_fantasia);
+        printf("CNPJ: %s\n", empresas[i].cnpj);
+        printf("--------------------------------\n");
+    }
+
+    printf(ANSI_GREEN"\n--Relatório exibido com sucesso!--\n"ANSI_RESET);
+    *telaAtual = TELA_MENU_PRINCIPAL;
+}
+
+void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empresaSelecionada, int *telaAtual) {
+    printf("\n\t-------------------------------------");
+    printf("\n\t\tGERENCIAMENTO - %s", empresas[empresaSelecionada].nome_fantasia);
+    printf("\n\t-------------------------------------\n");
+
+    printf("Escolha uma opção:\n");
+    printf("[1] Visualizar dados cadastrais.\n");
+    printf("[2] Visualizar Indicadores.\n");
+    printf("[3] Gerar Relatórios.\n");
+    printf("[4] Excluir cadastro.\n");
+    printf("[5] Voltar ao menu anterior.\n");
+    printf("[6] Sair.\n");
+
+    int opcao;
+    printf("Opção escolhida: ");
+    scanf("%d", &opcao);
+
+    while (getchar() != '\n');
+    switch (opcao) {
+        case 1:
+            //OPCAO DESNECESSARIO - CONVERSAR COM RESTO DO GRUPO
+            break;
+        case 2:
+            visualizarIndicadores(&empresas[empresaSelecionada]);
+            break;
+        case 3:
+           // JA TEM OUTRA TELA PRA ISSO
+            break;
+        case 4:
+            excluirCadastro(empresas, &numEmpresas);
+            printf(ANSI_GREEN"\nCadastro excluído com sucesso!\n"ANSI_RESET);
+            pausarExecucao();
+            *telaAtual = TELA_MENU_PRINCIPAL;break;
+        case 5:
+            *telaAtual = TELA_MENU_PRINCIPAL;break;
+        case 6:
+            *telaAtual = TELA_SAIR;break;
+        default:
+            printf(ANSI_RED"Opção inválida. Tente novamente.\n"ANSI_RESET);break;
+    }
+}
+
+void excluirCadastro(struct Empresa **empresas, int *numEmpresas) {
+    char cnpjExclusao[15];
+    printf("\nDigite o CNPJ da empresa que deseja excluir: ");
+    scanf(" %[^\n]", cnpjExclusao);
+
+    int indiceExclusao = -1;
+    for (int i = 0; i < *numEmpresas; i++) {
+        if (strcmp((*empresas)[i].cnpj, cnpjExclusao) == 0) {
+            indiceExclusao = i;            break;        }
+    }
+
+    if (indiceExclusao != -1) {
+        for (int i = indiceExclusao; i < *numEmpresas - 1; i++) {
+            (*empresas)[i] = (*empresas)[i + 1];        }
+
+        struct Empresa *temp = realloc(*empresas, (*numEmpresas - 1) * sizeof(struct Empresa));
+
+        if (temp != NULL) {
+            *empresas = temp;
+            (*numEmpresas)--;
+        } else {            printf(ANSI_RED"Erro ao liberar memória.\n"ANSI_RESET);system("pause");        }
+    } else {        printf(ANSI_RED"Empresa com o CNPJ fornecido não encontrada.\n"ANSI_RESET);    }
+}
+
+void limparTela() {
+    system("cls");
+}
+
+void pausarExecucao() {
+    printf(ANSI_GREEN"[---Pressione Enter para continuar---]"ANSI_RESET);
+    while (getchar() != '\n');
+}
+
+void visualizarIndicadores(const struct Empresa *empresa) {
+    time_t t = time(NULL);
+    struct tm tm_info = *localtime(&t);
+    char dataAtual[20];
+    strftime(dataAtual, sizeof(dataAtual), "%d/%m/%Y", &tm_info);
+
+    double residosAtual = (rand() % 100000) + 50000.0;
+    double residosAnterior = (rand() % 100000) + 20000.0;
+double custoDaOperacao = (rand() % 556000) + 25600.0;
+
+    printf(ANSI_GREEN"\n INDICADORES ATUAIS"ANSI_RESET);
+    printf("\nNo dia %s a empresa %s tratou de %.2f toneladas,\n ultrapassando a sua marca anterior de %.2f.\n",
+           dataAtual, empresa->nome_fantasia, residosAtual, residosAnterior);
+    printf(ANSI_GREEN"\n Custo da Operação: R$ %.2f"ANSI_RESET, custoDaOperacao);
 }
