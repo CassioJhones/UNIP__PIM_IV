@@ -1,8 +1,10 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <string.h>
+#include <time.h>
 
 // códigos ANSI para cores
 #define ANSI_RESET   "\x1b[0m"
@@ -31,6 +33,7 @@ struct Empresa {
     char cidade[50];
     char estado[3];
     char cep[10];
+    char indicadores[500];
 };
 
 enum Telas {
@@ -43,6 +46,8 @@ enum Telas {
     TELA_NOVA_OPCAO
 };
 
+void visualizarIndicadores(const struct Empresa *empresa);
+void visualizarIndicadores(const struct Empresa *empresa);
 void excluirCadastro(struct Empresa **empresas, int *numEmpresas);
 void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empresaSelecionada, int *telaAtual);
 void exibirMenuPrincipal(const struct Usuario *usuarioLogado);
@@ -292,18 +297,8 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
 
     for (int i = 0; i < numEmpresas; i++) {
         printf("Empresa %d:\n", i + 1);
-        printf("Razão Social: %s\n", empresas[i].razao_social);
         printf("Nome Fantasia: %s\n", empresas[i].nome_fantasia);
         printf("CNPJ: %s\n", empresas[i].cnpj);
-        printf("Data de Abertura: %s\n", empresas[i].data_abertura);
-        printf("Telefone: %s\n", empresas[i].telefone);
-        printf("Responsável: %s\n", empresas[i].responsavel);
-        printf("E-mail: %s\n", empresas[i].email);
-        printf("Endereço: %s\n", empresas[i].endereco);
-        printf("Bairro: %s\n", empresas[i].bairro);
-        printf("Cidade: %s\n", empresas[i].cidade);
-        printf("Estado: %s\n", empresas[i].estado);
-        printf("CEP: %s\n", empresas[i].cep);
         printf("--------------------------------\n");
     }
 
@@ -317,9 +312,9 @@ void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empres
     printf("\n\t-------------------------------------\n");
 
     printf("Escolha uma opção:\n");
-    printf("[1] Visualizar dados cadastrais.\n");//OPCAO DESNECESSARIO - CONVERSAR COM RESTO DO GRUPO
-    printf("[2] Visualizar Indicadores.\n"); // OPCAO DESNECESSARIO - CONVERSAR COM RESTO DO GRUPO
-    printf("[3] Gerar Relatórios.\n"); // JA TEM OUTRA TELA PRA ISSO
+    printf("[1] Visualizar dados cadastrais.\n");
+    printf("[2] Visualizar Indicadores.\n");
+    printf("[3] Gerar Relatórios.\n");
     printf("[4] Excluir cadastro.\n");
     printf("[5] Voltar ao menu anterior.\n");
     printf("[6] Sair.\n");
@@ -334,16 +329,18 @@ void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empres
             //OPCAO DESNECESSARIO - CONVERSAR COM RESTO DO GRUPO
             break;
         case 2:
-            //OPCAO DESNECESSARIO - CONVERSAR COM RESTO DO GRUPO
+            visualizarIndicadores(&empresas[empresaSelecionada]);
             break;
         case 3:
            // JA TEM OUTRA TELA PRA ISSO
             break;
         case 4:
             excluirCadastro(empresas, &numEmpresas);
-            printf(ANSI_GREEN"\nCadastro excluído com sucesso!\n"ANSI_RESET);break;
+            printf(ANSI_GREEN"\nCadastro excluído com sucesso!\n"ANSI_RESET);
+            pausarExecucao();
+            *telaAtual = TELA_MENU_PRINCIPAL;break;
         case 5:
-            *telaAtual = TELA_GERENCIAR_EMPRESAS;break;
+            *telaAtual = TELA_MENU_PRINCIPAL;break;
         case 6:
             *telaAtual = TELA_SAIR;break;
         default:
@@ -359,29 +356,43 @@ void excluirCadastro(struct Empresa **empresas, int *numEmpresas) {
     int indiceExclusao = -1;
     for (int i = 0; i < *numEmpresas; i++) {
         if (strcmp((*empresas)[i].cnpj, cnpjExclusao) == 0) {
-            indiceExclusao = i;
-            break;
-        }
+            indiceExclusao = i;            break;        }
     }
 
     if (indiceExclusao != -1) {
         for (int i = indiceExclusao; i < *numEmpresas - 1; i++) {
-            (*empresas)[i] = (*empresas)[i + 1];
-        }
+            (*empresas)[i] = (*empresas)[i + 1];        }
 
         struct Empresa *temp = realloc(*empresas, (*numEmpresas - 1) * sizeof(struct Empresa));
 
         if (temp != NULL) {
             *empresas = temp;
             (*numEmpresas)--;
-        } else {
-            printf(ANSI_RED"Erro ao liberar memória.\n"ANSI_RESET);system("pause");
-        }
-    } else {
-        printf(ANSI_RED"Empresa com o CNPJ fornecido não encontrada.\n"ANSI_RESET);
-    }
+        } else {            printf(ANSI_RED"Erro ao liberar memória.\n"ANSI_RESET);system("pause");        }
+    } else {        printf(ANSI_RED"Empresa com o CNPJ fornecido não encontrada.\n"ANSI_RESET);    }
 }
 
 void limparTela() {
     system("cls");
+}
+
+void pausarExecucao() {
+    printf(ANSI_GREEN"[---Pressione Enter para continuar---]"ANSI_RESET);
+    while (getchar() != '\n');
+}
+
+void visualizarIndicadores(const struct Empresa *empresa) {
+    time_t t = time(NULL);
+    struct tm tm_info = *localtime(&t);
+    char dataAtual[20];
+    strftime(dataAtual, sizeof(dataAtual), "%d/%m/%Y", &tm_info);
+
+    double residosAtual = (rand() % 100000) + 50000.0;
+    double residosAnterior = (rand() % 100000) + 20000.0;
+double custoDaOperacao = (rand() % 556000) + 25600.0;
+
+    printf(ANSI_GREEN"\n INDICADORES ATUAIS"ANSI_RESET);
+    printf("\nNo dia %s a empresa %s tratou de %.2f toneladas,\n ultrapassando a sua marca anterior de %.2f.\n",
+           dataAtual, empresa->nome_fantasia, residosAtual, residosAnterior);
+    printf(ANSI_GREEN"\n Custo da Operação: R$ %.2f"ANSI_RESET, custoDaOperacao);
 }
