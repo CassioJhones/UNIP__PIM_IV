@@ -1,8 +1,0 @@
-# depslib dependency file v1.0
-1700932299 source:c:\users\cassi\desktop\joao\main.c
-	<stdio.h>
-	<conio.h>
-	<stdlib.h>
-	<locale.h>
-	<string.h>
-
