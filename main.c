@@ -15,13 +15,15 @@ const char* obterNomeMes(int mes);
 #define ANSI_YELLOW  "\x1b[33m"
 #define ANSI_BLUE    "\x1b[34m"
 
-struct Usuario{
+struct Usuario
+{
     char nome_completo[100];
     char login[20];
     char senha[20];
     int empresaSelecionada;
 };
-struct Empresa{
+struct Empresa
+{
     char razao_social[100];
     char nome_fantasia[100];
     char cnpj[15];
@@ -36,7 +38,8 @@ struct Empresa{
     char cep[10];
     char indicadores[500];
 };
-enum Telas{
+enum Telas
+{
     TELA_MENU_PRINCIPAL,
     TELA_CADASTRO_EMPRESA,
     TELA_GERENCIAR_EMPRESAS,
@@ -60,36 +63,53 @@ void gerenciarEmpresas(struct Empresa *empresas, int numEmpresas, int *telaAtual
 void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaAtual);
 void limparTela();
 struct Usuario fazerLogin(const struct Usuario *usuarios, int numUsuarios);
-const char* obterNomeMes(int mes){
-    switch (mes){
-    case 1:return "Janeiro";
-    case 2:return "Fevereiro";
-    case 3:return "Março";
-    case 4:return "Abril";
-    case 5:return "Maio";
-    case 6:return "Junho";
-    case 7:return "Julho";
-    case 8:return "Agosto";
-    case 9:return "Setembro";
-    case 10:return "Outubro";
-    case 11:return "Novembro";
-    case 12:return "Dezembro";
-    default:return "Mês inválido";
+const char* obterNomeMes(int mes)
+{
+    switch (mes)
+    {
+    case 1:
+        return "Janeiro";
+    case 2:
+        return "Fevereiro";
+    case 3:
+        return "Março";
+    case 4:
+        return "Abril";
+    case 5:
+        return "Maio";
+    case 6:
+        return "Junho";
+    case 7:
+        return "Julho";
+    case 8:
+        return "Agosto";
+    case 9:
+        return "Setembro";
+    case 10:
+        return "Outubro";
+    case 11:
+        return "Novembro";
+    case 12:
+        return "Dezembro";
+    default:
+        return "Mês inválido";
     }
 }
-int main(){
+int main()
+{
 
     SetConsoleTitle("Sistema GESA - PIM IV - UNIP");
     setlocale(LC_ALL, "Portuguese");
     struct Usuario usuarios[7] =
-    { //   Nome  |-- LOGIN--SENHA--|
+    {
+        //   Nome  |-- LOGIN--SENHA--|
         {"Cassio", "cassio", "1234"},
         {"Bruno", "bruno", "1234"},
         {"Luan", "luan", "1234"},
         {"Joao", "joao", "1234"},
         {"Yago", "yago", "1234"},
         {"Ellen", "ellen", "1234"},
-        {"ADMINISTRADOR", "0", "0"}
+        {"ADMINISTRADOR", "admin", "admin"}
     };
     struct Empresa *empresas = NULL;
     int numEmpresas = 0;
@@ -169,15 +189,20 @@ int main(){
             switch (opcao)
             {
             case 1:
-                telaAtual = TELA_CADASTRO_EMPRESA;break;
+                telaAtual = TELA_CADASTRO_EMPRESA;
+                break;
             case 2:
-                telaAtual = TELA_GERENCIAR_EMPRESAS;break;
+                telaAtual = TELA_GERENCIAR_EMPRESAS;
+                break;
             case 3:
-                telaAtual = TELA_RELATORIO;break;
+                telaAtual = TELA_RELATORIO;
+                break;
             case 4:
-                telaAtual = TELA_CONSULTA_EMPRESA;break;
+                telaAtual = TELA_CONSULTA_EMPRESA;
+                break;
             case 5:
-                telaAtual = TELA_SAIR;break;
+                telaAtual = TELA_SAIR;
+                break;
             default:
                 printf(ANSI_RED"\nOpção inválida. Tente novamente.\n"ANSI_RESET);
                 system("pause");
@@ -312,9 +337,11 @@ void gerenciarEmpresas(struct Empresa *empresas, int numEmpresas, int *telaAtual
     switch (opcao)
     {
     case 1:
-        *telaAtual = TELA_CONSULTA_EMPRESA;break;
+        *telaAtual = TELA_CONSULTA_EMPRESA;
+        break;
     case 2:
-        *telaAtual = TELA_MENU_PRINCIPAL;break;
+        *telaAtual = TELA_MENU_PRINCIPAL;
+        break;
     default:
         printf(ANSI_RED"\n[--Opção inválida. Tente novamente--]\n"ANSI_RESET);
         system("pause");
@@ -340,7 +367,8 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
     printf("Opção escolhida: ");
     scanf("%d", &opcaoRelatorio);
     while (getchar() != '\n');
-    switch (opcaoRelatorio)    {
+    switch (opcaoRelatorio)
+    {
     case 1:
     {
         printf("\n-------------------------------------");
@@ -366,13 +394,15 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
         switch (opcaoSalvar)
         {
         case 1:
-            printf(ANSI_GREEN"[--Relatório salvo com sucesso!--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_GREEN"[--Relatório salvo com sucesso!--]\n"ANSI_RESET);
+            system("pause");
             break;
         case 2:
             *telaAtual = TELA_MENU_PRINCIPAL;
             break;
         default:
-            printf(ANSI_RED"[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);
+            system("pause");
             *telaAtual = TELA_MENU_PRINCIPAL;
             break;
         }
@@ -413,13 +443,15 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
         switch (opcaoSalvar)
         {
         case 1:
-            printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);
+            system("pause");
             break;
         case 2:
             *telaAtual = TELA_GERAR_RELATORIO;
             break;
         default:
-           printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);
+            system("pause");
             *telaAtual = TELA_GERAR_RELATORIO;
             break;
         }
@@ -437,7 +469,8 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
         scanf("%d", &ano2);
         if (ano1 < ANO_INICIAL || ano2 < ANO_INICIAL || ano1 > ANO_FINAL || ano2 > ANO_FINAL)
         {
-            printf(ANSI_RED"\n[--Ano(s) inválido(s). Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"\n[--Ano(s) inválido(s). Retornando ao menu anterior--]\n"ANSI_RESET);
+            system("pause");
             *telaAtual = TELA_GERAR_RELATORIO;
             break;
         }
@@ -461,13 +494,15 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
         switch (opcaoSalvar)
         {
         case 1:
-           printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);
+            system("pause");
             break;
         case 2:
             *telaAtual = TELA_MENU_PRINCIPAL;
             break;
         default:
-            printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);
+            system("pause");
             *telaAtual = TELA_GERAR_RELATORIO;
             break;
         }
@@ -506,13 +541,15 @@ void exibirRelatorio(const struct Empresa *empresas, int numEmpresas, int *telaA
         switch (opcaoSalvar)
         {
         case 1:
-           printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);
+            system("pause");
             break;
         case 2:
             *telaAtual = TELA_MENU_PRINCIPAL;
             break;
         default:
-            printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);
+            system("pause");
             *telaAtual = TELA_MENU_PRINCIPAL;
             break;
         }
@@ -538,7 +575,8 @@ void relatorioEstadoMaiorVolume(const struct Empresa *empresas, int numEmpresas,
     scanf("%d", &anoDesejado);
     if (anoDesejado < ANO_INICIAL || anoDesejado > ANO_FINAL)
     {
-        printf(ANSI_RED"\n[--Ano inválido. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+        printf(ANSI_RED"\n[--Ano inválido. Retornando ao menu anterior--]\n"ANSI_RESET);
+        system("pause");
         return;
     }
     int maiorVolume = -1;
@@ -572,13 +610,15 @@ void relatorioEstadoMaiorVolume(const struct Empresa *empresas, int numEmpresas,
     switch (opcaoSalvar)
     {
     case 1:
-        printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);system("pause");
+        printf(ANSI_GREEN"\n[--Relatório salvo com sucesso!--]\n"ANSI_RESET);
+        system("pause");
         break;
     case 2:
         *telaAtual = TELA_MENU_PRINCIPAL;
         break;
     default:
-        printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);system("pause");
+        printf(ANSI_RED"\n[--Opção inválida. Retornando ao menu anterior--]\n"ANSI_RESET);
+        system("pause");
         break;
     }
 }
@@ -636,11 +676,14 @@ void opGerenciamento(const struct Empresa *empresas, int numEmpresas, int empres
         *telaAtual = TELA_MENU_PRINCIPAL;
         break;
     case 5:
-        *telaAtual = TELA_GERENCIAR_EMPRESAS;        break;
+        *telaAtual = TELA_GERENCIAR_EMPRESAS;
+        break;
     case 6:
-        *telaAtual = TELA_SAIR;        break;
+        *telaAtual = TELA_SAIR;
+        break;
     default:
-        printf(ANSI_RED"\n[--Opção inválida. Tente novamente--]\n"ANSI_RESET);system("pause");
+        printf(ANSI_RED"\n[--Opção inválida. Tente novamente--]\n"ANSI_RESET);
+        system("pause");
         break;
     }
 }
@@ -675,16 +718,19 @@ void excluirCadastro(const struct Empresa **empresas, int *numEmpresas,int *tela
             free(*empresas);
             *empresas = temp;
             (*numEmpresas)--;
-            printf(ANSI_GREEN"\nEmpresa excluída com sucesso!\n"ANSI_RESET);system("pause");
+            printf(ANSI_GREEN"\nEmpresa excluída com sucesso!\n"ANSI_RESET);
+            system("pause");
         }
         else
         {
-            printf(ANSI_RED"Erro ao alocar memória para a exclusão.\n"ANSI_RESET);system("pause");
+            printf(ANSI_RED"Erro ao alocar memória para a exclusão.\n"ANSI_RESET);
+            system("pause");
         }
     }
     else
     {
-        printf(ANSI_RED"[--Empresa com o CNPJ fornecido não encontrada--]\n"ANSI_RESET);system("pause");
+        printf(ANSI_RED"[--Empresa com o CNPJ fornecido não encontrada--]\n"ANSI_RESET);
+        system("pause");
     }
     *telaAtual = TELA_MENU_PRINCIPAL;
 }
@@ -701,14 +747,14 @@ void visualizarIndicadores(const struct Empresa *empresa)
     strftime(dataAtual, sizeof(dataAtual), "%d/%m/%Y", &tm_info);
 
     double arrecada01 = ((double)rand() / RAND_MAX) * 5000.0+ 1020.0;
-   double arrecada02 = ((double)rand() / RAND_MAX) * 2000.0 + 800.0;
+    double arrecada02 = ((double)rand() / RAND_MAX) * 2000.0 + 800.0;
     printf(ANSI_GREEN"\n[--INDICADORES ATUAIS--]"ANSI_RESET);
     printf("\nNo dia %s a %s arrecadou R$ %.2f",dataAtual, empresa->nome_fantasia, arrecada02);
     printf("\nSuperando o record de R$ %.2f.\n", arrecada01);
 }
 
 void inicializarEmpresas(struct Empresa **empresas, int *numEmpresas)
-{//NAO MODIFICAR NADA POR AQUI! - INFORMAÇÕES FIXAS PARA FACILITAR CRIACAO DO DOCUMENTO
+{
     struct Empresa novaEmpresa;
     strcpy(novaEmpresa.razao_social, "GreenVista Innovations Ltda");
     strcpy(novaEmpresa.nome_fantasia, "GreenVista EcoTech");
@@ -724,7 +770,8 @@ void inicializarEmpresas(struct Empresa **empresas, int *numEmpresas)
     strcpy(novaEmpresa.cep, "01234-567");
 
     struct Empresa *temp = realloc(*empresas, (*numEmpresas + 1) * sizeof(struct Empresa));
-    if (temp == NULL)    {
+    if (temp == NULL)
+    {
         printf(ANSI_RED"\nErro ao alocar memória.\n"ANSI_RESET);
         system("pause");
         return;
