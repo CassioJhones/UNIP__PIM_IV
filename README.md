@@ -1,5 +1,8 @@
 # UNIP__PIM_IV
 
+
+![GitHub repo size](https://img.shields.io/github/repo-size/CassioJhones/UNIP__PIM_IV?style=for-the-badge&label=Project%20Size&labelColor=%23512BD4) 
+
 TELAS ATÉ O MOMENTO
 
 <img src="https://github.com/CassioJhones/UNIP__PIM_IV/assets/56178855/9fe20dc8-48a5-41a2-9da7-d8913cb9973a" alt="3relatorioVazio">
